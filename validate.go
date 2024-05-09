@@ -114,6 +114,11 @@ func (ctx *ValidationContext) transform(
 	// map the path to the passed signature relative to the passed root, in
 	// order to enable removal of the signature by an enveloped signature
 	// transform
+
+	signedInfoEl := el.FindElement("//SignedInfo")
+
+	signedInfoBytes, _ := json.Marshal(signedInfoEl)
+	fmt.Println("Signed Info: ", string(signedInfoBytes))
 	signaturePath := mapPathToElement(el, sig.UnderlyingElement())
 
 	jsonBytes, _ := json.Marshal(signaturePath)
