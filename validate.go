@@ -119,6 +119,8 @@ func (ctx *ValidationContext) transform(
 
 	signedInfoEl := el.FindElement("//SignedInfo")
 	el.RemoveChild(signedInfoEl)
+	removedSignedInfoBytes, _ := json.Marshal(el)
+	fmt.Println("Removed SignedInfo: ", string(removedSignedInfoBytes))
 
 	signedInfoBytes, _ := json.Marshal(signedInfoEl)
 	fmt.Println("Signed Info: ", string(signedInfoBytes))
@@ -274,6 +276,9 @@ func (ctx *ValidationContext) validateSignature(el *etree.Element, sig *types.Si
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println("Digest: ", string(digest))
+	fmt.Println("Decoded Digest: ", string(decodedDigestValue))
 
 	if !bytes.Equal(digest, decodedDigestValue) {
 		return nil, errors.New("Signature could not be verified")
