@@ -266,6 +266,9 @@ func (ctx *ValidationContext) validateSignature(el *etree.Element, sig *types.Si
 		return nil, err
 	}
 
+	removedSignedBytes, _ := json.Marshal(transformed)
+	fmt.Println("Removed Signed Info: ", string(removedSignedBytes))
+
 	digestAlgorithm := ref.DigestAlgo.Algorithm
 
 	// Digest the transformed XML and compare it to the 'DigestValue' from the 'SignedInfo'
