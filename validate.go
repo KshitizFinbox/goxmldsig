@@ -132,6 +132,11 @@ func (ctx *ValidationContext) transform(
 
 			signedInfoBytes, _ := json.Marshal(signedInfoEl)
 			fmt.Println("Signed Info: ", string(signedInfoBytes))
+
+			//////////////////////// HERE ///////////////////////////
+
+			canonicalizer = MakeC14N10RecCanonicalizer()
+
 			// if !removeElementAtPath(el, signaturePath) {
 			// 	return nil, nil, errors.New("Error applying canonicalization transform: Signature not found")
 			// }
