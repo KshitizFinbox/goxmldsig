@@ -242,6 +242,9 @@ func (ctx *ValidationContext) validateSignature(el *etree.Element, sig *types.Si
 		}
 	}
 
+	jsonBytes, err := json.Marshal(ref)
+	fmt.Println("References: ", string(jsonBytes))
+
 	// Perform all transformations listed in the 'SignedInfo'
 	// Basically, this means removing the 'SignedInfo'
 	transformed, canonicalizer, err := ctx.transform(el, sig, ref)
