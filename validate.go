@@ -114,6 +114,8 @@ func (ctx *ValidationContext) transform(
 	// order to enable removal of the signature by an enveloped signature
 	// transform
 
+	signaturePath := mapPathToElement(el, sig.UnderlyingElement())
+
 	el = el.Copy()
 
 	// make a copy of the passed root
@@ -125,13 +127,18 @@ func (ctx *ValidationContext) transform(
 
 		switch AlgorithmID(algo) {
 		case EnvelopedSignatureAltorithmId:
-			signedInfoEl := el.FindElement("//SignedInfo")
-			el.RemoveChild(signedInfoEl)
+
+			if !removeElementAtPath(el, signaturePath) {
+				return nil, nil, errors.New("Error applying canonicalization transform: Signature not found")
+			}
+
+			// signedInfoEl := el.FindElement("//SignedInfo")
+			// signedInfoBytes, _ := json.Marshal(signedInfoEl)
+			// fmt.Println("Signed Info: ", string(signedInfoBytes))
+
+			// el.RemoveChild(signedInfoEl)
 			removedSignedInfoBytes, _ := json.Marshal(el)
 			fmt.Println("Removed SignedInfo: ", string(removedSignedInfoBytes))
-
-			signedInfoBytes, _ := json.Marshal(signedInfoEl)
-			fmt.Println("Signed Info: ", string(signedInfoBytes))
 
 			//////////////////////// HERE ///////////////////////////
 
