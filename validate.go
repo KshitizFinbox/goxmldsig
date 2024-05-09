@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
 
+	"github.com/KshitizFinbox/goxmldsig/etreeutils"
+	"github.com/KshitizFinbox/goxmldsig/types"
 	"github.com/beevik/etree"
-	"github.com/russellhaering/goxmldsig/etreeutils"
-	"github.com/russellhaering/goxmldsig/types"
 )
 
 var uriRegexp = regexp.MustCompile("^#[a-zA-Z_][\\w.-]*$")
@@ -457,6 +458,11 @@ func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Cer
 		return nil, errors.New("Could not verify certificate against trusted certs")
 	}
 
+	jsonBytes, err := json.Marshal(cert)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(string(jsonBytes))
 	if now.Before(cert.NotBefore) || now.After(cert.NotAfter) {
 		return nil, errors.New("Cert is not valid at this time")
 	}
