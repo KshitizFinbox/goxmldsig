@@ -273,7 +273,7 @@ func (ctx *ValidationContext) validateSignature(el *etree.Element, sig *types.Si
 	// }
 
 	fmt.Println("Digest from XML: ", string(ref.DigestValue))
-	fmt.Println("Digest: ", string(digest))
+	fmt.Println("Digest Base64: ", base64.StdEncoding.EncodeToString(digest))
 	// fmt.Println("Decoded Digest: ", string(decodedDigestValue))
 
 	// if !bytes.Equal(digest, decodedDigestValue) {
