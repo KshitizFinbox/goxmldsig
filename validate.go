@@ -130,6 +130,10 @@ func (ctx *ValidationContext) transform(
 				return nil, nil, errors.New("Error applying canonicalization transform: Signature not found")
 			}
 
+			//////////////////////// HERE ///////////////////////////
+
+			// canonicalizer = MakeC14N10RecCanonicalizer()
+
 		case CanonicalXML10ExclusiveAlgorithmId:
 			var prefixList string
 			if transform.InclusiveNamespaces != nil {
@@ -176,6 +180,9 @@ func (ctx *ValidationContext) digest(el *etree.Element, digestAlgorithmId string
 		return nil, err
 	}
 
+	// fmt.Println("CANONICALIZED DATA: ", string(data))
+
+	// fmt.Println("Digest Algorithm ID: ", digestAlgorithmId)
 	digestAlgorithm, ok := digestAlgorithmsByIdentifier[digestAlgorithmId]
 	if !ok {
 		return nil, errors.New("Unknown digest algorithm: " + digestAlgorithmId)
@@ -242,12 +249,18 @@ func (ctx *ValidationContext) validateSignature(el *etree.Element, sig *types.Si
 		}
 	}
 
+	// jsonBytes, err := json.Marshal(ref)
+	// fmt.Println("References: ", string(jsonBytes))
+
 	// Perform all transformations listed in the 'SignedInfo'
 	// Basically, this means removing the 'SignedInfo'
 	transformed, canonicalizer, err := ctx.transform(el, sig, ref)
 	if err != nil {
 		return nil, err
 	}
+
+	removedSignedBytes, _ := json.Marshal(transformed)
+	fmt.Println("Removed Signed Info: ", string(removedSignedBytes))
 
 	digestAlgorithm := ref.DigestAlgo.Algorithm
 
@@ -262,9 +275,16 @@ func (ctx *ValidationContext) validateSignature(el *etree.Element, sig *types.Si
 		return nil, err
 	}
 
+	fmt.Println("Digest from XML: ", string(ref.DigestValue))
+	fmt.Println("Digest Base64: ", base64.StdEncoding.EncodeToString(digest))
+	// fmt.Println("Decoded Digest: ", string(decodedDigestValue))
+
 	if !bytes.Equal(digest, decodedDigestValue) {
 		return nil, errors.New("Signature could not be verified")
 	}
+	// if base64.StdEncoding.EncodeToString(digest) != ref.DigestValue {
+	// 	return nil, errors.New("Signature could not be verified")
+	// }
 	if sig.SignatureValue == nil {
 		return nil, errors.New("Signature could not be verified")
 	}
@@ -428,6 +448,9 @@ func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Cer
 
 	var cert *x509.Certificate
 
+	signatureJsonBytes, err := json.Marshal(sig)
+	fmt.Println("Signature: ", string(signatureJsonBytes))
+
 	if sig.KeyInfo != nil {
 		// If the Signature includes KeyInfo, extract the certificate from there
 		if len(sig.KeyInfo.X509Data.X509Certificates) == 0 || sig.KeyInfo.X509Data.X509Certificates[0].Data == "" {
@@ -462,7 +485,7 @@ func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Cer
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(string(jsonBytes))
+	fmt.Println("Certificate: ", string(jsonBytes))
 	// if now.Before(cert.NotBefore) || now.After(cert.NotAfter) {
 	// 	return nil, errors.New("Cert is not valid at this time")
 	// }
