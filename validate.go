@@ -1,7 +1,6 @@
 package dsig
 
 import (
-	"bytes"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
@@ -268,15 +267,19 @@ func (ctx *ValidationContext) validateSignature(el *etree.Element, sig *types.Si
 		return nil, err
 	}
 
-	decodedDigestValue, err := base64.StdEncoding.DecodeString(ref.DigestValue)
-	if err != nil {
-		return nil, err
-	}
+	// decodedDigestValue, err := base64.StdEncoding.DecodeString(ref.DigestValue)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
+	fmt.Println("Digest from XML: ", string(ref.DigestValue))
 	fmt.Println("Digest: ", string(digest))
-	fmt.Println("Decoded Digest: ", string(decodedDigestValue))
+	// fmt.Println("Decoded Digest: ", string(decodedDigestValue))
 
-	if !bytes.Equal(digest, decodedDigestValue) {
+	// if !bytes.Equal(digest, decodedDigestValue) {
+	// 	return nil, errors.New("Signature could not be verified")
+	// }
+	if base64.StdEncoding.EncodeToString(digest) != ref.DigestValue {
 		return nil, errors.New("Signature could not be verified")
 	}
 	if sig.SignatureValue == nil {
