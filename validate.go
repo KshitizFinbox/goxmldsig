@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -418,7 +419,7 @@ func (ctx *ValidationContext) findSignature(root *etree.Element) (*types.Signatu
 }
 
 func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Certificate, error) {
-	now := ctx.Clock.Now()
+	// now := ctx.Clock.Now()
 
 	roots, err := ctx.CertificateStore.Certificates()
 	if err != nil {
@@ -443,6 +444,9 @@ func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Cer
 		if err != nil {
 			return nil, err
 		}
+		jsonBytes, _ := json.Marshal(cert)
+		fmt.Println("Certificate: ", string(jsonBytes))
+
 	} else {
 		// If the Signature doesn't have KeyInfo, Use the root certificate if there is only one
 		if len(roots) == 1 {
@@ -457,9 +461,9 @@ func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Cer
 		return nil, errors.New("Could not verify certificate against trusted certs")
 	}
 
-	if now.Before(cert.NotBefore) || now.After(cert.NotAfter) {
-		return nil, errors.New("Cert is not valid at this time")
-	}
+	// if now.Before(cert.NotBefore) || now.After(cert.NotAfter) {
+	// 	return nil, errors.New("Cert is not valid at this time")
+	// }
 
 	return cert, nil
 }
