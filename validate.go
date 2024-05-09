@@ -444,6 +444,9 @@ func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Cer
 		if err != nil {
 			return nil, err
 		}
+		jsonBytes, _ := json.Marshal(cert)
+		fmt.Println("Certificate: ", string(jsonBytes))
+
 	} else {
 		// If the Signature doesn't have KeyInfo, Use the root certificate if there is only one
 		if len(roots) == 1 {
@@ -458,11 +461,6 @@ func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Cer
 		return nil, errors.New("Could not verify certificate against trusted certs")
 	}
 
-	jsonBytes, err := json.Marshal(cert)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println(string(jsonBytes))
 	// if now.Before(cert.NotBefore) || now.After(cert.NotAfter) {
 	// 	return nil, errors.New("Cert is not valid at this time")
 	// }
