@@ -187,6 +187,8 @@ func (ctx *ValidationContext) digest(el *etree.Element, digestAlgorithmId string
 		return nil, err
 	}
 
+	fmt.Println("CANONICALIZED DATA: ", string(data))
+
 	fmt.Println("Digest Algorithm ID: ", digestAlgorithmId)
 	digestAlgorithm, ok := digestAlgorithmsByIdentifier[digestAlgorithmId]
 	if !ok {
