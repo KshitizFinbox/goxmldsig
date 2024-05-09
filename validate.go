@@ -116,6 +116,9 @@ func (ctx *ValidationContext) transform(
 	// transform
 	signaturePath := mapPathToElement(el, sig.UnderlyingElement())
 
+	jsonBytes, _ := json.Marshal(signaturePath)
+	fmt.Println("Signature Path: ", string(jsonBytes))
+
 	// make a copy of the passed root
 	el = el.Copy()
 
