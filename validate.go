@@ -428,6 +428,9 @@ func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Cer
 
 	var cert *x509.Certificate
 
+	signatureJsonBytes, err := json.Marshal(sig)
+	fmt.Println("Signature: ", string(signatureJsonBytes))
+
 	if sig.KeyInfo != nil {
 		// If the Signature includes KeyInfo, extract the certificate from there
 		if len(sig.KeyInfo.X509Data.X509Certificates) == 0 || sig.KeyInfo.X509Data.X509Certificates[0].Data == "" {
