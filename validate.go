@@ -188,6 +188,7 @@ func (ctx *ValidationContext) digest(el *etree.Element, digestAlgorithmId string
 		return nil, err
 	}
 
+	fmt.Println("Digest Algorithm ID: ", digestAlgorithmId)
 	digestAlgorithm, ok := digestAlgorithmsByIdentifier[digestAlgorithmId]
 	if !ok {
 		return nil, errors.New("Unknown digest algorithm: " + digestAlgorithmId)
