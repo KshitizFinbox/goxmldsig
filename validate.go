@@ -109,13 +109,16 @@ func (ctx *ValidationContext) transform(
 	el *etree.Element,
 	sig *types.Signature,
 	ref *types.Reference) (*etree.Element, Canonicalizer, error) {
-	transforms := ref.Transforms.Transforms
+	// transforms := ref.Transforms.Transforms
 
 	// map the path to the passed signature relative to the passed root, in
 	// order to enable removal of the signature by an enveloped signature
 	// transform
 
+	el = el.Copy()
+
 	signedInfoEl := el.FindElement("//SignedInfo")
+	el.RemoveChild(signedInfoEl)
 
 	signedInfoBytes, _ := json.Marshal(signedInfoEl)
 	fmt.Println("Signed Info: ", string(signedInfoBytes))
@@ -125,51 +128,50 @@ func (ctx *ValidationContext) transform(
 	fmt.Println("Signature Path: ", string(jsonBytes))
 
 	// make a copy of the passed root
-	el = el.Copy()
 
 	var canonicalizer Canonicalizer
 
-	for _, transform := range transforms {
-		algo := transform.Algorithm
+	// for _, transform := range transforms {
+	// 	algo := transform.Algorithm
 
-		switch AlgorithmID(algo) {
-		case EnvelopedSignatureAltorithmId:
-			if !removeElementAtPath(el, signaturePath) {
-				return nil, nil, errors.New("Error applying canonicalization transform: Signature not found")
-			}
+	// 	switch AlgorithmID(algo) {
+	// 	case EnvelopedSignatureAltorithmId:
+	// 		if !removeElementAtPath(el, signaturePath) {
+	// 			return nil, nil, errors.New("Error applying canonicalization transform: Signature not found")
+	// 		}
 
-		case CanonicalXML10ExclusiveAlgorithmId:
-			var prefixList string
-			if transform.InclusiveNamespaces != nil {
-				prefixList = transform.InclusiveNamespaces.PrefixList
-			}
+	// 	case CanonicalXML10ExclusiveAlgorithmId:
+	// 		var prefixList string
+	// 		if transform.InclusiveNamespaces != nil {
+	// 			prefixList = transform.InclusiveNamespaces.PrefixList
+	// 		}
 
-			canonicalizer = MakeC14N10ExclusiveCanonicalizerWithPrefixList(prefixList)
+	// 		canonicalizer = MakeC14N10ExclusiveCanonicalizerWithPrefixList(prefixList)
 
-		case CanonicalXML10ExclusiveWithCommentsAlgorithmId:
-			var prefixList string
-			if transform.InclusiveNamespaces != nil {
-				prefixList = transform.InclusiveNamespaces.PrefixList
-			}
+	// 	case CanonicalXML10ExclusiveWithCommentsAlgorithmId:
+	// 		var prefixList string
+	// 		if transform.InclusiveNamespaces != nil {
+	// 			prefixList = transform.InclusiveNamespaces.PrefixList
+	// 		}
 
-			canonicalizer = MakeC14N10ExclusiveWithCommentsCanonicalizerWithPrefixList(prefixList)
+	// 		canonicalizer = MakeC14N10ExclusiveWithCommentsCanonicalizerWithPrefixList(prefixList)
 
-		case CanonicalXML11AlgorithmId:
-			canonicalizer = MakeC14N11Canonicalizer()
+	// 	case CanonicalXML11AlgorithmId:
+	// 		canonicalizer = MakeC14N11Canonicalizer()
 
-		case CanonicalXML11WithCommentsAlgorithmId:
-			canonicalizer = MakeC14N11WithCommentsCanonicalizer()
+	// 	case CanonicalXML11WithCommentsAlgorithmId:
+	// 		canonicalizer = MakeC14N11WithCommentsCanonicalizer()
 
-		case CanonicalXML10RecAlgorithmId:
-			canonicalizer = MakeC14N10RecCanonicalizer()
+	// 	case CanonicalXML10RecAlgorithmId:
+	// 		canonicalizer = MakeC14N10RecCanonicalizer()
 
-		case CanonicalXML10WithCommentsAlgorithmId:
-			canonicalizer = MakeC14N10WithCommentsCanonicalizer()
+	// 	case CanonicalXML10WithCommentsAlgorithmId:
+	// 		canonicalizer = MakeC14N10WithCommentsCanonicalizer()
 
-		default:
-			return nil, nil, errors.New("Unknown Transform Algorithm: " + algo)
-		}
-	}
+	// 	default:
+	// 		return nil, nil, errors.New("Unknown Transform Algorithm: " + algo)
+	// 	}
+	// }
 
 	if canonicalizer == nil {
 		canonicalizer = MakeNullCanonicalizer()
