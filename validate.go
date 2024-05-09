@@ -114,12 +114,10 @@ func (ctx *ValidationContext) transform(
 	// map the path to the passed signature relative to the passed root, in
 	// order to enable removal of the signature by an enveloped signature
 	// transform
-
 	signaturePath := mapPathToElement(el, sig.UnderlyingElement())
 
-	el = el.Copy()
-
 	// make a copy of the passed root
+	el = el.Copy()
 
 	var canonicalizer Canonicalizer
 
@@ -128,26 +126,13 @@ func (ctx *ValidationContext) transform(
 
 		switch AlgorithmID(algo) {
 		case EnvelopedSignatureAltorithmId:
-
 			if !removeElementAtPath(el, signaturePath) {
 				return nil, nil, errors.New("Error applying canonicalization transform: Signature not found")
 			}
 
-			// signedInfoEl := el.FindElement("//SignedInfo")
-			// signedInfoBytes, _ := json.Marshal(signedInfoEl)
-			// fmt.Println("Signed Info: ", string(signedInfoBytes))
-
-			// el.RemoveChild(signedInfoEl)
-			removedSignedInfoBytes, _ := json.Marshal(el)
-			fmt.Println("Removed SignedInfo: ", string(removedSignedInfoBytes))
-
 			//////////////////////// HERE ///////////////////////////
 
-			canonicalizer = MakeC14N10RecCanonicalizer()
-
-			// if !removeElementAtPath(el, signaturePath) {
-			// 	return nil, nil, errors.New("Error applying canonicalization transform: Signature not found")
-			// }
+			// canonicalizer = MakeC14N10RecCanonicalizer()
 
 		case CanonicalXML10ExclusiveAlgorithmId:
 			var prefixList string
@@ -195,9 +180,9 @@ func (ctx *ValidationContext) digest(el *etree.Element, digestAlgorithmId string
 		return nil, err
 	}
 
-	fmt.Println("CANONICALIZED DATA: ", string(data))
+	// fmt.Println("CANONICALIZED DATA: ", string(data))
 
-	fmt.Println("Digest Algorithm ID: ", digestAlgorithmId)
+	// fmt.Println("Digest Algorithm ID: ", digestAlgorithmId)
 	digestAlgorithm, ok := digestAlgorithmsByIdentifier[digestAlgorithmId]
 	if !ok {
 		return nil, errors.New("Unknown digest algorithm: " + digestAlgorithmId)
@@ -264,8 +249,8 @@ func (ctx *ValidationContext) validateSignature(el *etree.Element, sig *types.Si
 		}
 	}
 
-	jsonBytes, err := json.Marshal(ref)
-	fmt.Println("References: ", string(jsonBytes))
+	// jsonBytes, err := json.Marshal(ref)
+	// fmt.Println("References: ", string(jsonBytes))
 
 	// Perform all transformations listed in the 'SignedInfo'
 	// Basically, this means removing the 'SignedInfo'
