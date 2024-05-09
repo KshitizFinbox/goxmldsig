@@ -489,7 +489,7 @@ func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Cer
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(string(jsonBytes))
+	fmt.Println("Certificate: ", string(jsonBytes))
 	// if now.Before(cert.NotBefore) || now.After(cert.NotAfter) {
 	// 	return nil, errors.New("Cert is not valid at this time")
 	// }
