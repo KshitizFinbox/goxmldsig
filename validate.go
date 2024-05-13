@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-	"strconv"
 
 	"github.com/KshitizFinbox/goxmldsig/etreeutils"
 	"github.com/KshitizFinbox/goxmldsig/types"
@@ -32,11 +31,11 @@ type ValidationContext struct {
 	Clock            *Clock
 	Mobile           string
 	Email            string
-	ShareCode        int
+	ShareCode        string
 	AadhaarLastDigit int
 }
 
-func NewUidaiOKYCValidationContext(certificateStore X509CertificateStore, mobile, email string, shareCode, aadhaarLastDigit int) *ValidationContext {
+func NewUidaiOKYCValidationContext(certificateStore X509CertificateStore, mobile, email, shareCode string, aadhaarLastDigit int) *ValidationContext {
 	return &ValidationContext{
 		CertificateStore: certificateStore,
 		IdAttribute:      DefaultIdAttr,
@@ -316,7 +315,7 @@ func (ctx *ValidationContext) validatePersonalInfo(el *etree.Element) types.Pers
 	fmt.Println("Actual Share Code: ", ctx.ShareCode)
 
 	if mobile != "default-mobile" {
-		lastInput := ctx.Mobile + strconv.Itoa(ctx.ShareCode)
+		lastInput := ctx.Mobile + ctx.ShareCode
 		for i := 0; i < ctx.AadhaarLastDigit; i++ {
 			h := sha256.Sum256([]byte(lastInput))
 			lastInput = hex.EncodeToString(h[:])
@@ -325,7 +324,7 @@ func (ctx *ValidationContext) validatePersonalInfo(el *etree.Element) types.Pers
 	}
 
 	if email != "default-email" {
-		lastInput := ctx.Email + strconv.Itoa(ctx.ShareCode)
+		lastInput := ctx.Email + ctx.ShareCode
 		for i := 0; i < ctx.AadhaarLastDigit; i++ {
 			h := sha256.Sum256([]byte(lastInput))
 			lastInput = hex.EncodeToString(h[:])
