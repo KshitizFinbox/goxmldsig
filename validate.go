@@ -313,6 +313,7 @@ func (ctx *ValidationContext) validatePersonalInfo(el *etree.Element) types.Pers
 
 	fmt.Println("Actual Mobile: ", ctx.Mobile)
 	fmt.Println("Actual Email: ", ctx.Email)
+	fmt.Println("Actual Share Code: ", ctx.ShareCode)
 
 	if mobile != "default-mobile" {
 		lastInput := ctx.Mobile + strconv.Itoa(ctx.ShareCode)
