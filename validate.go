@@ -2,12 +2,15 @@ package dsig
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 
 	"github.com/KshitizFinbox/goxmldsig/etreeutils"
 	"github.com/KshitizFinbox/goxmldsig/types"
@@ -28,6 +31,21 @@ type ValidationContext struct {
 	CertificateStore X509CertificateStore
 	IdAttribute      string
 	Clock            *Clock
+	Mobile           string
+	Email            string
+	ShareCode        int
+	AadhaarLastDigit int
+}
+
+func NewUidaiOKYCValidationContext(certificateStore X509CertificateStore, mobile, email string, shareCode, aadhaarLastDigit int) *ValidationContext {
+	return &ValidationContext{
+		CertificateStore: certificateStore,
+		IdAttribute:      DefaultIdAttr,
+		Mobile:           mobile,
+		Email:            email,
+		ShareCode:        shareCode,
+		AadhaarLastDigit: aadhaarLastDigit,
+	}
 }
 
 func NewDefaultValidationContext(certificateStore X509CertificateStore) *ValidationContext {
@@ -285,6 +303,32 @@ func (ctx *ValidationContext) validateSignature(el *etree.Element, sig *types.Si
 	return transformed, nil
 }
 
+func (ctx *ValidationContext) validatePersonalInfo(el *etree.Element) types.PersonalInfoValidation {
+	mobile := el.FindElement("//Poi").SelectAttrValue("m", "default-mobile")
+	email := el.FindElement("//Poi").SelectAttrValue("e", "default-email")
+	var response types.PersonalInfoValidation
+
+	if mobile != "default-mobile" {
+		lastInput := ctx.Mobile + strconv.Itoa(ctx.ShareCode)
+		for i := 0; i < ctx.AadhaarLastDigit; i++ {
+			h := sha256.Sum256([]byte(lastInput))
+			lastInput = hex.EncodeToString((h[:]))
+		}
+		response.MobileMatch = lastInput == mobile
+	}
+
+	if email != "default-email" {
+		lastInput := ctx.Email + strconv.Itoa(ctx.ShareCode)
+		for i := 0; i < ctx.AadhaarLastDigit; i++ {
+			h := sha256.Sum256([]byte(lastInput))
+			lastInput = hex.EncodeToString((h[:]))
+		}
+		response.EmailMatch = lastInput == email
+	}
+
+	return response
+}
+
 func contains(roots []*x509.Certificate, cert *x509.Certificate) bool {
 	for _, root := range roots {
 		if root.Equal(cert) {
@@ -419,8 +463,6 @@ func (ctx *ValidationContext) findSignature(root *etree.Element) (*types.Signatu
 }
 
 func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Certificate, error) {
-	// now := ctx.Clock.Now()
-
 	roots, err := ctx.CertificateStore.Certificates()
 	if err != nil {
 		return nil, err
@@ -461,6 +503,8 @@ func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Cer
 		return nil, errors.New("Could not verify certificate against trusted certs")
 	}
 
+	// now := ctx.Clock.Now()
+
 	// if now.Before(cert.NotBefore) || now.After(cert.NotAfter) {
 	// 	return nil, errors.New("Cert is not valid at this time")
 	// }
@@ -470,19 +514,26 @@ func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Cer
 
 // Validate verifies that the passed element contains a valid enveloped signature
 // matching a currently-valid certificate in the context's CertificateStore.
-func (ctx *ValidationContext) Validate(el *etree.Element) (*etree.Element, error) {
+func (ctx *ValidationContext) Validate(el *etree.Element) (*etree.Element, *types.PersonalInfoValidation, error) {
 	// Make a copy of the element to avoid mutating the one we were passed.
 	el = el.Copy()
 
 	sig, err := ctx.findSignature(el)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	cert, err := ctx.verifyCertificate(sig)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return ctx.validateSignature(el, sig, cert)
+	validateSignature, err := ctx.validateSignature(el, sig, cert)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	personalInfo := ctx.validatePersonalInfo(validateSignature)
+
+	return validateSignature, &personalInfo, err
 }
