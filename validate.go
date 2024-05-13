@@ -308,11 +308,15 @@ func (ctx *ValidationContext) validatePersonalInfo(el *etree.Element) types.Pers
 	email := el.FindElement("//Poi").SelectAttrValue("e", "default-email")
 	var response types.PersonalInfoValidation
 
+	fmt.Println("Aadhaar Last Digit", ctx.AadhaarLastDigit)
+	fmt.Println("Encoded Mobile: ", mobile)
+	fmt.Println("Encoded Email: ", email)
+
 	if mobile != "default-mobile" {
 		lastInput := ctx.Mobile + strconv.Itoa(ctx.ShareCode)
 		for i := 0; i < ctx.AadhaarLastDigit; i++ {
 			h := sha256.Sum256([]byte(lastInput))
-			lastInput = hex.EncodeToString((h[:]))
+			lastInput = hex.EncodeToString(h[:])
 		}
 		response.MobileMatch = lastInput == mobile
 	}
@@ -321,7 +325,7 @@ func (ctx *ValidationContext) validatePersonalInfo(el *etree.Element) types.Pers
 		lastInput := ctx.Email + strconv.Itoa(ctx.ShareCode)
 		for i := 0; i < ctx.AadhaarLastDigit; i++ {
 			h := sha256.Sum256([]byte(lastInput))
-			lastInput = hex.EncodeToString((h[:]))
+			lastInput = hex.EncodeToString(h[:])
 		}
 		response.EmailMatch = lastInput == email
 	}
