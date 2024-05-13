@@ -306,14 +306,6 @@ func (ctx *ValidationContext) validatePersonalInfo(el *etree.Element) types.Pers
 	email := el.FindElement("//Poi").SelectAttrValue("e", "default-email")
 	var response types.PersonalInfoValidation
 
-	fmt.Println("Aadhaar Last Digit", ctx.AadhaarLastDigit)
-	fmt.Println("Encoded Mobile: ", mobile)
-	fmt.Println("Encoded Email: ", email)
-
-	fmt.Println("Actual Mobile: ", ctx.Mobile)
-	fmt.Println("Actual Email: ", ctx.Email)
-	fmt.Println("Actual Share Code: ", ctx.ShareCode)
-
 	if mobile != "default-mobile" {
 		lastInput := ctx.Mobile + ctx.ShareCode
 		for i := 0; i < ctx.AadhaarLastDigit; i++ {
