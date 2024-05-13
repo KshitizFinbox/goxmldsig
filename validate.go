@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -312,6 +311,9 @@ func (ctx *ValidationContext) validatePersonalInfo(el *etree.Element) types.Pers
 	fmt.Println("Encoded Mobile: ", mobile)
 	fmt.Println("Encoded Email: ", email)
 
+	fmt.Println("Actual Mobile: ", ctx.Mobile)
+	fmt.Println("Actual Email: ", ctx.Email)
+
 	if mobile != "default-mobile" {
 		lastInput := ctx.Mobile + strconv.Itoa(ctx.ShareCode)
 		for i := 0; i < ctx.AadhaarLastDigit; i++ {
@@ -490,8 +492,6 @@ func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Cer
 		if err != nil {
 			return nil, err
 		}
-		jsonBytes, _ := json.Marshal(cert)
-		fmt.Println("Certificate: ", string(jsonBytes))
 
 	} else {
 		// If the Signature doesn't have KeyInfo, Use the root certificate if there is only one
