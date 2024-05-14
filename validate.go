@@ -304,11 +304,15 @@ func (ctx *ValidationContext) validateSignature(el *etree.Element, sig *types.Si
 func (ctx *ValidationContext) validatePersonalInfo(el *etree.Element) types.PersonalInfoValidation {
 	mobile := el.FindElement("//Poi").SelectAttrValue("m", "default-mobile")
 	email := el.FindElement("//Poi").SelectAttrValue("e", "default-email")
+	aadhaarLastDigit := ctx.AadhaarLastDigit
+	if ctx.AadhaarLastDigit == 0 {
+		aadhaarLastDigit = 1
+	}
 	var response types.PersonalInfoValidation
 
 	if mobile != "default-mobile" {
 		lastInput := ctx.Mobile + ctx.ShareCode
-		for i := 0; i < ctx.AadhaarLastDigit; i++ {
+		for i := 0; i < aadhaarLastDigit; i++ {
 			h := sha256.Sum256([]byte(lastInput))
 			lastInput = hex.EncodeToString(h[:])
 		}
@@ -317,7 +321,7 @@ func (ctx *ValidationContext) validatePersonalInfo(el *etree.Element) types.Pers
 
 	if email != "default-email" {
 		lastInput := ctx.Email + ctx.ShareCode
-		for i := 0; i < ctx.AadhaarLastDigit; i++ {
+		for i := 0; i < aadhaarLastDigit; i++ {
 			h := sha256.Sum256([]byte(lastInput))
 			lastInput = hex.EncodeToString(h[:])
 		}
